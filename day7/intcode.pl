@@ -4,6 +4,8 @@ use Data::Dumper;
 # use Smart::Comments;
 use v5.10;
 
+$| = 1;
+
 sub pos {
     my ($tape_ref, $index) = @_;
     my @tape = @{ $tape_ref };
@@ -29,6 +31,7 @@ open my $fh, "<", $file_name or die "Can't open $file_name, $!\n";
 my $inputline = <$fh>;
 chomp $inputline;
 my @tape = split /,/,  $inputline;
+close $fh;
 
 my $pc = 0; # program counter is no longer consistent
 
@@ -36,11 +39,14 @@ my @actions = (
     sub { print "noop" },                 # no opcode 0
     sub { return $_[0] + $_[1] },         # 1
     sub { return $_[0] * $_[1] },         # 2
-    sub { my $in = <STDIN>;
+    sub {
+        print STDERR ("Getting input!\n");
+        my $in = <STDIN>;
+        print STDERR ("Read >$in<\n");
         chomp $in;
         return $in;
     },                    # 3
-    sub { print $_[0]; },                   # 4
+    sub { say $_[0]; },                   # 4
     sub { return $_[0] ? $_[1] : -1 },    # 5, ugh, you might want to jump to 0
     sub { return $_[0] ? -1 : $_[1] },    # 6
     sub { return $_[0] < $_[1] ? 1 : 0},  # 7
